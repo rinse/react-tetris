@@ -1,0 +1,6 @@
+export const PX_WIDTH_CELL = 24;
+export const PX_HEIGHT_CELL = 24;
+export const CELL_WIDTH_BOARD = 10 + 2;
+export const CELL_HEIGHT_BOARD = 20 + 2;
+export const PX_WIDTH_CANVAS = PX_WIDTH_CELL * CELL_WIDTH_BOARD;
+export const PX_HEIGHT_CANVAS = PX_HEIGHT_CELL * CELL_HEIGHT_BOARD;
