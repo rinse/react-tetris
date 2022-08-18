@@ -17,7 +17,13 @@ import {
     MINO_KIND_WALL,
     Mino,
     MinoKind,
-    minoOf, cloneMino, rotateMinoRight, rotateMinoLeft, getMinoCellPositions,
+    minoOf,
+    cloneMino,
+    rotateMinoRight,
+    rotateMinoLeft,
+    getMinoCellPositions,
+    originPositionsSuperRotateRight,
+    originPositionsSuperRotateLeft,
 } from "./MinoKind";
 import {addPositions, positionOf, Position, incrementPosY, incrementPosXBy} from "./Position";
 
@@ -207,11 +213,11 @@ function processKeyInput(state: TetrisState, key: string) {
             state.frameMinoCannotDrop /= 1.2;
             break;
         case "k":
-            tryRotateRight(state);
+            trySuperRotateRight(state);
             state.frameMinoCannotDrop /= 1.2;
             break;
         case "K":
-            tryRotateLeft(state);
+            trySuperRotateLeft(state);
             state.frameMinoCannotDrop /= 1.2;
             break;
         case " ":
@@ -235,18 +241,20 @@ function tryMoveMino(state: TetrisState, destination: Position): boolean {
     return tryTransformCurrentMino(state, state.currentMino, destination);
 }
 
-function tryRotateRight(state: TetrisState): boolean {
+function trySuperRotateRight(state: TetrisState): boolean {
     const newMino = rotateMinoRight(state.currentMino);
-    return tryTransformCurrentMino(state, newMino, state.minoPosition)
-        || tryTransformCurrentMino(state, newMino, incrementPosXBy(state.minoPosition, 1))
-        || tryTransformCurrentMino(state, newMino, incrementPosXBy(state.minoPosition, -1));
+    const originCandidates = originPositionsSuperRotateRight(state.currentMino.kind, state.currentMino.posture);
+    return originCandidates.some(originPosition => {
+        return tryTransformCurrentMino(state, newMino, addPositions(state.minoPosition, originPosition))
+    });
 }
 
-function tryRotateLeft(state: TetrisState): boolean {
+function trySuperRotateLeft(state: TetrisState): boolean {
     const newMino = rotateMinoLeft(state.currentMino);
-    return tryTransformCurrentMino(state, newMino, state.minoPosition)
-        || tryTransformCurrentMino(state, newMino, incrementPosXBy(state.minoPosition, 1))
-        || tryTransformCurrentMino(state, newMino, incrementPosXBy(state.minoPosition, -1));
+    const originCandidates = originPositionsSuperRotateLeft(state.currentMino.kind, state.currentMino.posture);
+    return originCandidates.some(originPosition => {
+        return tryTransformCurrentMino(state, newMino, addPositions(state.minoPosition, originPosition))
+    });
 }
 
 function tryTransformCurrentMino(state: TetrisState, newMino: Mino, newMinoPosition: Position) {

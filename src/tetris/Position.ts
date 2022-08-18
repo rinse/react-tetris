@@ -11,12 +11,13 @@ export function addPositions(a: Position, b: Position): Position {
     return positionOf(a.x + b.x, a.y + b.y);
 }
 
-export function rotatePosLeft(p: Position): Position {
-    return positionOf(p.y, -p.x);
-}
-
+// A right rotation of 90 degrees given by the rotation matrix.
 export function rotatePosRight(p: Position): Position {
     return positionOf(-p.y, p.x);
+}
+
+export function rotatePosLeft(p: Position): Position {
+    return positionOf(p.y, -p.x);
 }
 
 export function incrementPosXBy(position: Position, step: number): Position {

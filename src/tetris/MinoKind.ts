@@ -1,4 +1,4 @@
-import {Position, positionOf, rotatePosLeft, rotatePosRight} from "./Position";
+import {Position, positionOf, rotatePosRight} from "./Position";
 import {CELL_HEIGHT_BOARD, CELL_WIDTH_BOARD} from "./constants";
 import {applyNTimes, rangeA} from "./utilities";
 
@@ -21,7 +21,7 @@ type MinoDefinition = {
 const minoDefinitions: { readonly [kind in MinoKind]: MinoDefinition } = {
     I: {
         colour: "rgb(0, 255, 255)",
-        positions: [positionOf(-1, 0), positionOf(0, 0), positionOf(1, 0), positionOf(2, 0)],
+        positions: [], // The I mino has no origin (0, 0). See ICellPositionsForEachPosture.
     },
     O: {
         colour: "rgb(255, 255, 0)",
@@ -76,6 +76,13 @@ function rotateMinoPostureLeft(posture: MinoPosture): MinoPosture {
     return applyNTimes(3, rotateMinoPostureRight, posture);
 }
 
+const ICellPositionsForEachPosture: { readonly [kind in MinoPosture]: Position[] } = {
+    0: [positionOf(-1, 0), positionOf(0, 0), positionOf(1, 0), positionOf(2, 0)],
+    1: [positionOf(1, -1), positionOf(1, 0), positionOf(1, 1), positionOf(1, 2)],
+    2: [positionOf(-1, -1), positionOf(0, -1), positionOf(1, -1), positionOf(2, -1)],
+    3: [positionOf(0, -1), positionOf(0, 0), positionOf(0, 1), positionOf(0, 2)],
+};
+
 export type Mino = {
     kind: MinoKind,
     posture: MinoPosture,
@@ -104,6 +111,9 @@ export function getMinoCellPositions(mino: Mino): Position[] {
         // The O mino has no posture.
         return minoDefinitions["O"].positions;
     }
+    if (mino.kind === "I") {
+        return ICellPositionsForEachPosture[mino.posture];
+    }
     return minoDefinitions[mino.kind].positions
         .map(position => applyNTimes(mino.posture, rotatePosRight, position));
 }
@@ -122,4 +132,115 @@ export function rotateMinoLeft(mino: Mino): Mino {
         posture: rotateMinoPostureLeft(mino.posture),
         colour: mino.colour,
     };
+}
+
+export function originPositionsSuperRotateRight(kind: MinoKind, posture: MinoPosture): Position[] {
+    if (kind === "T") {
+        return originPositionsSuperRotateRightT(posture);
+    }
+    if (kind === "I") {
+        return originPositionsSuperRotateRightI(posture);
+    }
+    switch (posture) {
+        case 0:
+            return [positionOf(0, 0), positionOf(-1, 0), positionOf(-1, -1), positionOf(0, 2), positionOf(-1, 2)];
+        case 1:
+            return [positionOf(0, 0), positionOf(-1, 0), positionOf(-1, 1), positionOf(0, -2), positionOf(-1, -2)];
+        case 2:
+            return [positionOf(0, 0), positionOf(1, 0), positionOf(1, -1), positionOf(0, 2), positionOf(1, 2)];
+        case 3:
+            return [positionOf(0, 0), positionOf(-1, 0), positionOf(-1, 1), positionOf(0, -2), positionOf(-1, -2)];
+    }
+}
+
+export function originPositionsSuperRotateLeft(kind: MinoKind, posture: MinoPosture): Position[] {
+    if (kind === "T") {
+        return originPositionsSuperRotateLeftT(posture);
+    }
+    if (kind === "I") {
+        return originPositionsSuperRotateLeftI(posture);
+    }
+    switch (posture) {
+        case 0:
+            return [positionOf(0, 0), positionOf(-1, 0), positionOf(-1, -1), positionOf(0, 2), positionOf(-1, 2)];
+        case 1:
+            return [positionOf(0, 0), positionOf(-1, 0), positionOf(1, 1), positionOf(0, -2), positionOf(1, -2)];
+        case 2:
+            return [positionOf(0, 0), positionOf(1, 0), positionOf(1, -1), positionOf(0, 2), positionOf(1, 2)];
+        case 3:
+            return [positionOf(0, 0), positionOf(-1, 0), positionOf(1, 1), positionOf(0, -2), positionOf(1, -2)];
+    }
+}
+
+const originPositionsSuperRotateRightT0: Position[] =
+    [positionOf(0, 0), positionOf(-1, 0), positionOf(-1, -1), positionOf(0, 2), positionOf(-1, 2)];
+
+const originPositionsSuperRotateRightT1: Position[] = originPositionsSuperRotateRightT0.map(pos => positionOf(-pos.x, -pos.y));
+
+const originPositionsSuperRotateRightT2: Position[] = originPositionsSuperRotateRightT0.map(pos => positionOf(pos.x, -pos.y));
+
+const originPositionsSuperRotateRightT3: Position[] =
+    [positionOf(0, 0), positionOf(-1, 0), positionOf(-1, 1), positionOf(0, -2), positionOf(-1, -2)];
+
+const originPositionsSuperRotateLeftT0: Position[] = originPositionsSuperRotateRightT0.map(pos => positionOf(-pos.x, pos.y));
+
+const originPositionsSuperRotateLeftT1: Position[] = originPositionsSuperRotateRightT1;
+// originPositionsSuperRotateRightT0.map(pos => positionOf(-pos.x, -pos.y));
+
+const originPositionsSuperRotateLeftT2: Position[] = originPositionsSuperRotateRightT0;
+
+const originPositionsSuperRotateLeftT3: Position[] = originPositionsSuperRotateRightT2;
+
+// originPositionsSuperRotateRightT0.map(pos => positionOf(pos.x, -pos.y));
+
+function originPositionsSuperRotateRightT(posture: MinoPosture): Position[] {
+    switch (posture) {
+        case 0:
+            return originPositionsSuperRotateRightT0;
+        case 1:
+            return originPositionsSuperRotateRightT1;
+        case 2:
+            return originPositionsSuperRotateRightT2;
+        case 3:
+            return originPositionsSuperRotateRightT3;
+    }
+}
+
+function originPositionsSuperRotateLeftT(posture: MinoPosture): Position[] {
+    switch (posture) {
+        case 0:
+            return originPositionsSuperRotateLeftT0;
+        case 1:
+            return originPositionsSuperRotateLeftT1;
+        case 2:
+            return originPositionsSuperRotateLeftT2;
+        case 3:
+            return originPositionsSuperRotateLeftT3;
+    }
+}
+
+function originPositionsSuperRotateRightI(posture: MinoPosture): Position[] {
+    switch (posture) {
+        case 0:
+            return [positionOf(0, 0), positionOf(-2, 0), positionOf(1, 0), positionOf(-2, 1), positionOf(1, -2)];
+        case 1:
+            return [positionOf(0, 0), positionOf(-1, 0), positionOf(2, 0), positionOf(-1, -2), positionOf(2, 2)];
+        case 2:
+            return [positionOf(0, 0), positionOf(2, 0), positionOf(-1, 0), positionOf(2, -1), positionOf(-1, 2)];
+        case 3:
+            return [positionOf(0, 0), positionOf(-2, 0), positionOf(1, 0), positionOf(1, 2), positionOf(-2, -1)];
+    }
+}
+
+function originPositionsSuperRotateLeftI(posture: MinoPosture): Position[] {
+    switch (posture) {
+        case 0:
+            return [positionOf(0, 0), positionOf(-1, 0), positionOf(2, 0), positionOf(-1, -2), positionOf(2, 1)];
+        case 1:
+            return [positionOf(0, 0), positionOf(2, 0), positionOf(-1, 0), positionOf(2, -1), positionOf(-1, 2)];
+        case 2:
+            return [positionOf(0, 0), positionOf(1, 0), positionOf(-2, 0), positionOf(1, 2), positionOf(-2, -1)];
+        case 3:
+            return [positionOf(0, 0), positionOf(1, 0), positionOf(-2, 0), positionOf(-2, 1), positionOf(1, -2)];
+    }
 }
