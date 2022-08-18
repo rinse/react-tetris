@@ -22,3 +22,10 @@ export function* repeatShuffled<T>(array: readonly T[]): Generator<T, T, undefin
         yield* shuffle(array);
     }
 }
+
+export function applyNTimes<T>(n: number, f: (t: T) => T, t: T): T {
+    if (n <= 0) {
+        return t;
+    }
+    return applyNTimes(n - 1, f, f(t));
+}

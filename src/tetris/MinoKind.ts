@@ -1,6 +1,6 @@
 import {Position, positionOf, rotatePosLeft, rotatePosRight} from "./Position";
 import {CELL_HEIGHT_BOARD, CELL_WIDTH_BOARD} from "./constants";
-import {rangeA} from "./utilities";
+import {applyNTimes, rangeA} from "./utilities";
 
 export type MinoKind = "I" | "O" | "S" | "Z" | "J" | "L" | "T" | "Wall" | "Null" | "GameOver";
 
@@ -18,7 +18,7 @@ type MinoDefinition = {
 };
 
 // Defines a colour and an arrangement of cells for each mino kind.
-const MINO_DEFINITIONS: { readonly [kind in MinoKind]: MinoDefinition } = {
+const minoDefinitions: { readonly [kind in MinoKind]: MinoDefinition } = {
     I: {
         colour: "rgb(0, 255, 255)",
         positions: [positionOf(-1, 0), positionOf(0, 0), positionOf(1, 0), positionOf(2, 0)],
@@ -65,34 +65,61 @@ const MINO_DEFINITIONS: { readonly [kind in MinoKind]: MinoDefinition } = {
     },
 };
 
+// Each kind of mino has at most 4 postures.
+type MinoPosture = 0 | 1 | 2 | 3
+
+function rotateMinoPostureRight(posture: MinoPosture): MinoPosture {
+    return (posture + 1) % 4 as MinoPosture;
+}
+
+function rotateMinoPostureLeft(posture: MinoPosture): MinoPosture {
+    return applyNTimes(3, rotateMinoPostureRight, posture);
+}
+
 export type Mino = {
     kind: MinoKind,
-    positions: Position[],
+    posture: MinoPosture,
     colour: string,
 };
 
-export function minoOf(kind: MinoKind, positions?: Position[]): Mino {
+export function minoOf(kind: MinoKind): Mino {
     return {
         kind: kind,
-        positions: positions ?? MINO_DEFINITIONS[kind].positions,
-        colour: MINO_DEFINITIONS[kind].colour,
+        posture: 0,
+        colour: minoDefinitions[kind].colour,
     };
 }
 
 export function cloneMino(mino: Mino): Mino {
     return {
         kind: mino.kind,
-        positions: mino.positions,
+        posture: mino.posture,
         colour: mino.colour,
     };
 }
 
+// Get positions of each cell based on a mino kind and its posture.
+export function getMinoCellPositions(mino: Mino): Position[] {
+    if (mino.kind === "O") {
+        // The O mino has no posture.
+        return minoDefinitions["O"].positions;
+    }
+    return minoDefinitions[mino.kind].positions
+        .map(position => applyNTimes(mino.posture, rotatePosRight, position));
+}
+
 export function rotateMinoRight(mino: Mino): Mino {
-    const newCellPositions = mino.positions.map(rotatePosRight);
-    return minoOf(mino.kind, newCellPositions);
+    return {
+        kind: mino.kind,
+        posture: rotateMinoPostureRight(mino.posture),
+        colour: mino.colour,
+    };
 }
 
 export function rotateMinoLeft(mino: Mino): Mino {
-    const newCellPositions = mino.positions.map(rotatePosLeft);
-    return minoOf(mino.kind, newCellPositions);
+    return {
+        kind: mino.kind,
+        posture: rotateMinoPostureLeft(mino.posture),
+        colour: mino.colour,
+    };
 }

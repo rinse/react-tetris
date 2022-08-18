@@ -17,7 +17,7 @@ import {
     MINO_KIND_WALL,
     Mino,
     MinoKind,
-    minoOf, cloneMino, rotateMinoRight, rotateMinoLeft,
+    minoOf, cloneMino, rotateMinoRight, rotateMinoLeft, getMinoCellPositions,
 } from "./MinoKind";
 import {addPositions, positionOf, Position, incrementPosY, incrementPosXBy} from "./Position";
 
@@ -74,6 +74,7 @@ export function Tetris() {
     const tetrisRef = useRef<TetrisState>(createTetrisState());
     const [frame, setFrame] = useState(tetrisRef.current.frame);
     const [frameMinoCannotDrop, setFrameMinoCannotDrop] = useState(tetrisRef.current.frameMinoCannotDrop);
+    const [currentMinoPosture, setCurrentMinoPosture] = useState(tetrisRef.current.currentMino.posture);
     const [deletedLinesCount, setDeletedLinesCount] = useState(tetrisRef.current.deletedLinesCount);
     useEffect(() => {
         const eventType = "keydown" as const;
@@ -94,6 +95,7 @@ export function Tetris() {
         setFrame(tetrisState.frame);
         setDeletedLinesCount(tetrisState.deletedLinesCount);
         setFrameMinoCannotDrop(tetrisState.frameMinoCannotDrop);
+        setCurrentMinoPosture(tetrisState.currentMino.posture);
         // Clear the game screen, then draw the game screen.
         context.clearRect(0, 0, PX_WIDTH_CANVAS, PX_HEIGHT_CANVAS);
         drawTetrisState(context, tetrisState);
@@ -106,6 +108,7 @@ export function Tetris() {
             </canvas>
             <p>frame: {frame}</p>
             <p>frameMinoCannotDrop: {frameMinoCannotDrop}</p>
+            <p>currentMinoPosture: {currentMinoPosture}</p>
             <p>deleted lines: {deletedLinesCount}</p>
         </>
     );
@@ -300,7 +303,7 @@ function drawGhost(context: CanvasRenderingContext2D, state: TetrisState) {
 }
 
 function drawMino(context: CanvasRenderingContext2D, mino: Mino, minoPos: Position, frameColour: string) {
-    mino.positions.forEach(cellPos => {
+    getMinoCellPositions(mino).forEach(cellPos => {
         drawCell(context, addPositions(minoPos, cellPos), mino.colour, frameColour);
     });
 }
